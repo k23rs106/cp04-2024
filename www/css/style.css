@@ -46,6 +46,10 @@
         left:10px; right:10px;
         box-shadow: 5px 5px 5px;
     }
+
+    #time::after{
+        content: "秒";
+    }
     
     #mycanvas {
         color: #ffffff;
