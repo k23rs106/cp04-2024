@@ -18,15 +18,11 @@
     $(function(){
         setInterval(function(){
             timer();
-        },500);
+        },1000);
     });  
       
     // ready クリックの処理の登録
-    $(function() { 
-        $('#date').click(function(e) {
-            setDebugMode(e);
-        });
-      
+    $(function init() {      
         $('#btnA').click(function(e) {
             btnAClick(e);
         });
@@ -38,7 +34,18 @@
         $('#btnC').click(function(e) {
             btnCClick(e);
         });
-        init();
+
+        $('#btnmap').click(function(e) {
+            btnmapClick(e);
+        });
+        $('#btnClear').click(function(e) {
+            btnClearClick(e);
+        });        
+        
+        $('#btntime').click(function(e) {
+            btntimeClick(e);
+        });
+
     });
     
     function rgbToColor(r,g,b){
@@ -105,7 +112,7 @@
         for(var i = 0; i < 60; i++) {
             var px = getX(cx,i/60,0.9);
             var py = getY(cy,i/60,0.9);
-            ctx.fillStyle = 'rgb(0, 255, 0)'; 
+            ctx.fillStyle = 'rgb(0, 255, 255)'; 
             ctx.beginPath();
             ctx.arc(px, py, 2, 0, Math.PI*2, false);
             ctx.fill();
@@ -114,7 +121,7 @@
         for(var i = 0; i < 12; i++) {
             var px = getX(cx,i/12,0.9);
             var py = getY(cy,i/12,0.9);
-            ctx.fillStyle = 'rgb(255, 255, 0)'; 
+            ctx.fillStyle = 'rgb(0, 0, 0)'; 
             ctx.beginPath();
             ctx.arc(px, py, 5, 0, Math.PI*2, false);
             ctx.fill();
@@ -133,7 +140,7 @@
         var px = getX(cx,ds,0.9);
         var py = getY(cy,ds,0.9);
         line(ctx,cx,cy,px,py,5, 'rgb(128, 100, 255)')
-    }
+    }//clockのおわり
 
     // 残り秒数アナログ表示
     function analog(rest){
@@ -141,10 +148,11 @@
         var m = parseInt((rest-h*3600)/60);
         var s = parseInt(rest-h*3600-m*60);
         clock(h,m,s,true);
-
     }
 
-
+    function formatTime(hour,minute,second){
+        return decS2(hour)+":"+dec02(minute)+":"+dec02(second);
+    }
 
 // これより上は編集しなくて良い
 
@@ -162,16 +170,17 @@
         $('#btnA').prop('disabled', false);
         $('#btnB').prop('disabled', false);
         $('#btnC').prop('disabled', false);
+
         btnCClick(null);
     }
 
     // Alarmの処理
     function alarm(){
-            var canvas = $("#mycanvas")[0]; 
-    var ctx = canvas.getContext("2d"); 
-    var img = new Image(); 
-    img.src = "ksuisbg.gif";      
-    img.onload = function() {     
+        var canvas = $("#mycanvas")[0]; 
+        var ctx = canvas.getContext("2d"); 
+        var img = new Image(); 
+        img.src = "ksuisbg.gif";      
+        img.onload = function() {     
         ctx.drawImage(img, 0, 0, 300, 300); 
     };
 
@@ -184,9 +193,10 @@
     function btnAClick(e){
         active = true; 
         startTime = new Date();  
-        $('#btnB').prop('disabled', false);
         $('#btnA').prop('disabled', true);  
-    
+        $('#btnB').prop('disabled', false);
+        $('#btnmap').prop('disabled', true);
+        $('#btntime').prop('disabled', true);
     }
 
     // ButtonBがクリックされた時の処理
@@ -194,6 +204,8 @@
         active = false;
         $('#btnA').prop('disabled', false);
         $('#btnB').prop('disabled', true);
+        $('#btnmap').prop('disabled', true);
+        $('#btntime').prop('disabled', true);
     }
 
     // ButtonCがクリックされた時の処理
@@ -204,9 +216,65 @@
         $("#time").html("経過時間： 0");
         $("#remain").html("残り時間： " + period);
         $('#btnA').prop('disabled', false);
-
+        $('#btnB').prop('disabled', false);
+        $('#btnmap').prop('disabled', true);
+        $('#btntime').prop('disabled', true);
     }
     
+    function btnmapClick(e){
+        active = false;
+        $('#btnA').prop('disabled', true);
+        $('#btnB').prop('disabled', true);
+        $('#btnC').prop('disabled', true);
+        $('#btntime').prop('disabled', true);
+
+        var canvas = $("#mycanvas")[0]; 
+        var ctx = canvas.getContext("2d"); 
+        var img = new Image(); 
+        img.src = "pumpkin.png";      
+        img.onload = function() {     
+        ctx.drawImage(img, 0, 20, 200, 200); 
+        }
+    }
+    
+    function btnClearClick(e){
+        active = false;
+        var canvas = $("#mycanvas")[0]; 
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, 10000000, 1000000);
+
+        period = 60* parseInt(0) +parseInt(0); 
+        $("#time").html("経過時間： 0");
+        $("#remain").html("残り時間： " + period);
+
+        var audio = new Audio(); 
+        audio.src = "mini_bomb1.wav";
+        audio.play();
+        $('#btnA').prop('disabled', false);
+        $('#btnB').prop('disabled', false);
+        $('#btnC').prop('disabled', false);
+        $('#btnmap').prop('disabled', false);
+        $('#btntime').prop('disabled', false);
+    }
+    
+    function btntimeClick(e){
+        period = 60* parseInt( 3 ) +parseInt(0); 
+        $("#time").html("経過時間： 0");
+        $("#remain").html("残り時間： " + period);
+
+        var canvas = $("#mycanvas")[0]; 
+        var ctx = canvas.getContext("2d"); 
+        var img = new Image(); 
+        img.src = "men.png";      
+        img.onload = function() {     
+        ctx.drawImage(img, -20, 0, 220, 200); 
+        }
+
+        $('#btnA').prop('disabled', false);
+        $('#btnB').prop('disabled', true);
+        $('#btnC').prop('disabled', true);
+        $('#btnmap').prop('disabled', true);
+    }
  
     // 繰り返し実行する処理
     function timer(){  
@@ -222,22 +290,30 @@
         }
 
     } 
-
+//https://taira-komori.jpn.org/arms01.html
+//https://www.irasutoya.com/2018/10/blog-post_804.html
+//素材
   </script>
 </head>
 <body>
     <canvas id="mycanvas" width="200" height="200">Test</canvas>
 
-    <div id="minuteStr">〇</div>
-    <div id="secondStr">〇</div>
+    <div id="minuteStr"></div>
+    <div id="secondStr"></div>
 
     <div id="remain">Remaining time</div>
     <div id="time">Time</div>
     <button id="btnA">Start</button>  
     <button id="btnB">Stop</button>  
     <button id="btnC">Set</button>  
+    
+    <button id="btnmap">写真</button>  
+    <button id="btnClear">オールクリア&音</button>  
+    <button id="btntime">カップ麺タイマー</button>  
+
+
     <input type="number" id="minute" value=0 >
-    <input type="number" id="second" value=15 >
+    <input type="number" id="second" value=3 >
 
 
 </body>
